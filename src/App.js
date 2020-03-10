@@ -2,10 +2,12 @@ import "./App.css";
 import LocationForm from "./components/LocationForm";
 import React, { Component } from "react";
 import WeatherCard from "./components/WeatherCard";
+import LoadingIndicator from "./components/LoadingIndicator";
 
 class App extends Component {
-  state = { weatherInfo: "" };
+  state = { weatherInfo: "", isLoading: true };
   render() {
+    const { isLoading } = this.state;
     return (
       <>
         <h1>What Weather U Want?</h1>
@@ -13,7 +15,11 @@ class App extends Component {
           handleChange={this.handleChange}
           handleSubmit={this.handleSubmit}
         />
-        <WeatherCard {...this.state.weatherInfo} />
+        {isLoading ? (
+          <LoadingIndicator />
+        ) : (
+          <WeatherCard {...this.state.weatherInfo} />
+        )}
       </>
     );
   }
@@ -23,19 +29,34 @@ class App extends Component {
   };
   handleSubmit = event => {
     event.preventDefault();
+     fetch(
+       `https://api.openweathermap.org/data/2.5/weather?q=${this.state.newCity}&&appid=44a29f02dde67ea362372acd6d5bc7d8`
+     )
+       .then(response => {
+         return response.json();
+       })
+       .then(data => {
+         this.setState({
+           weatherInfo: data,
+           isLoading: false
+         });
+       });
   };
 
   componentDidMount() {
+    console.log(this.state.newCity);
     fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=London&&appid=44a29f02dde67ea362372acd6d5bc7d8`
+      `https://api.openweathermap.org/data/2.5/weather?q=manchester&&appid=44a29f02dde67ea362372acd6d5bc7d8`
     )
       .then(response => {
         return response.json();
       })
       .then(data => {
-        this.setState({ weatherInfo: data });
+        this.setState({ weatherInfo: data, isLoading: false });
       });
   }
+
+  
 }
 
 export default App;
